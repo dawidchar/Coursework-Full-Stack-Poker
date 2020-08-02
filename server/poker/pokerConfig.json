@@ -1,0 +1,9 @@
+{
+    "Poker": {
+        "smallBlind": 10,
+        "bigBlind": 20
+    },
+    "Table":{
+
+    }
+}

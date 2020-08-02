@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Get thee stylesheet from the server -->
+    <link rel="stylesheet" href="./public/style.css"> 
+</head>
+
+<body>
+    <!-- Vue is a Javascript framework that allows for more complex UI elements and interactions, creating a Vue Container will allow the 
+    Vue framework to work with the HTML through Javascript -->
+    <div class="info-container">
+        <h3 class="info-container-text" id="info-text">Info Text</h3>
+        </div>
+    <div class="vue-container">
+        <div class="table">
+            <div class="players">
+                <div class="your-cards">
+                    <!-- v-for is explained below -->
+                    <!-- Card is not a native element in HTML so we create this element in the code in the Vue handler (script.js) and it identifies how it should behave -->
+                    <card v-for="(card, index) in your_cards" :card="card" :key="playerCards"></card>
+                </div>
+                <!-- v-for is a feature of Vue, so in the Vue JS file (script.js) it has a array of all players, so it loops through it and creates a new HTML Div with all the
+                feautres seen below, but only for the players specificed in the players array-->
+                <!-- additionally, each player is given a player class but also through Vue hence the :class is given a sub-class so it can be placed in the correct position and have 
+                some unique styling that can be found in the style sheet -->
+                <!-- The Id is a unique identifier of that specific player and will allow it to be targeted in code by searching for an ID, this is used for displaying the current player -->
+                <div v-for="(value, index) in players" class="player" :class="['player-' + (index + 1)]" :id="['player-' + ((index))]">
+                    <!-- v-if means that if the condition is true only then create the element and all of its children, This just verifies the value is not blank and hence is actaually a player -->
+                    <div v-if="value">
+                        <!-- Using the value. we can access certain properties from the players array, such as the player color, however if a color is not specifiecd it used the defualt dogerblue -->
+                        <div class="avatar" :style="{backgroundColor: value.color || 'dodgerblue'}"></div>
+                        <!-- To use value data from the players but in the text area of the HTLM, you have to use double {{}} -->
+                        <div class="name">{{value.username}}</div>
+                        <div class="playerInfoWrapper">
+                            <div class="playerPot">{{value.onTable}}</div>
+                            <div class="playerBank">{{value.bank}}</div>
+                        </div>
+                        <!-- This display the grey cards that can be seen on players, however only display them if they are not for the player playing and ensure the cards have been dealt -->
+                        <div v-if="index!=0 && value.hasCards" class="player-cards">
+                            <div class="card hidden one"></div>
+                            <div class="card hidden two"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="table-cards">
+                <card v-for="(card, index) in table_cards" :card="card"></card>
+            </div>
+            <div class="table-pot">
+                <h2>Pot: £1000</h2>
+            </div>
+        </div>
+        <!-- Create the buttons and the action when they are clicked which is javascript code that can be found in the client handler -->
+        <div class="controls">
+            <a class="actionButton check" onclick="button_SendAction_Check()">Check</a>
+            <a class="actionButton call" onclick="button_SendAction_Call()">Call</a>
+            <div style="display:flex;flex-direction: column;justify-content: center;">
+                <a class="actionButton raise" onclick="button_SendAction_Raise()">Raise</a>
+                <input type="number" id="raise-input" min="0" max="500" onchange=
+                "var el=document.getElementById('raise-input'); 
+                if(el.validity.rangeOverflow)
+                {el.value = el.max};
+                if(el.validity.rangeUnderflow)
+                {el.value = el.min};
+                if(!Number.isInteger(el.value) && !isNaN(el.value)){
+                    el.value = Math.floor(el.value)
+                }
+                ">
+                <a class="actionButton AllIn" onclick="document.getElementById('raise-input').value=document.querySelector('#player-0 > div > div.playerInfoWrapper > div.playerBank').innerText">All In</a>
+           
+            </div>
+            <a class="actionButton fold" onclick="button_SendAction_Fold()">Fold</a>
+        </div>
+    </div>
+
+    <!-- importing the vue framework -->
+    <script src='./public/vue.min.js'></script>
+    <!-- Import the code that handles the Vue framework and hence controlls the Vue elements -->
+    <script src="./public/script.js"></script>
+
+</body>
+
+</html>
+<!-- Finally at the end get the client side colyseus framework to allow the client to connect with ther server -->
+<script type="text/javascript" src="./public/colyseus.js"></script>
+<!-- Import the code that controlls all the backend of the Player (Client Side) -->
+<script type="text/javascript" src="./public/clientHandler.js"></script>

@@ -1,0 +1,191 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+<style>
+    html {
+        font-family: Arial, sans-serif
+    }
+
+    .w-button {
+        display: inline-block;
+        padding: 9px 15px;
+        background-color: #3898EC;
+        color: white;
+        border: 0;
+        line-height: inherit;
+        text-decoration: none;
+        cursor: pointer;
+        border-radius: 0;
+        margin-top: 5px;
+        margin-bottom: 50px;
+    }
+
+    h3 {
+        margin-top: 25px;
+        margin-bottom: 0;
+    }
+
+    .heading {
+        text-align: center;
+    }
+
+    body {
+        padding-top: 100px;
+    }
+
+
+    .button {
+        width: auto;
+
+    }
+
+
+
+
+    .section-2 {
+        display: flex;
+        height: 100vh;
+        min-height: 100px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .divmain {
+        display: flex;
+        width: 85%;
+        height: 800px;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    .divlogin {
+        display: flex;
+        width: 300px;
+
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    h5 {
+        margin-bottom: 0;
+    }
+
+
+    .div-block-6 {
+        display: flex;
+        width: 80%;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+
+
+
+<body>
+    <div class="section-2">
+        <div class="divmain">
+            <div class="divlogin">
+                <h3>Login</h3>
+                <div class="div-block-6">
+                    <h5>Username</h5>
+                    <input id="login_username"></input>
+                    <h5>Password</h5>
+                    <input id="login_password" type="password"></input>
+                </div><a href="#" onclick="sendLogin()" class="w-button">Login</a>
+            </div>
+            <div class="divlogin">
+                <h3>Register</h3>
+                <div class="div-block-6">
+                    <h5>Name</h5>
+                    <input id="register_name"></input>
+                    <h5>Username</h5>
+                    <input id="register_username" ></input>
+                    <h5>Password</h5>
+                    <input id="register_password" type="password"></input>
+                    <h5>Confirm Password</h5>
+                    <input id="register_confirmpassword" type="password"></input>
+                </div><a href="#" onclick="sendRegister()"class="w-button">Register</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" src="./public/colyseus.js"></script>
+<script type="text/javascript" src="./public/cryptoCore.js"></script>
+<script type="text/javascript" src="./public/cryptoMD5.js"></script>
+<script>
+    var publicRoom;
+    var host = window.document.location.host.replace(/:.*/, '');
+    var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : ''));
+    client.joinOrCreate("Logon", { accessToken: getCookie("authTokenID") }).then(room => {
+        publicRoom = room;
+        room.onMessage((message) => {
+            console.log(message);
+            if (message.loginSuccess) {
+                document.cookie = ("authTokenID=" + message.loginSuccess.authToken.id + "; expires=" + message.loginSuccess.authToken.expiry)
+                window.location.replace(window.location.origin + "/main")
+            }
+            else if (message.loginFail) {
+                alert("Login Failed Reason: " + message.loginFail);
+                console.log("Login Failed Reason: " + message.loginFail);
+            }
+            else if (message.registerSuccess) {
+                document.cookie = ("authTokenID=" + message.registerSuccess.authToken.id + "; expires=" + message.registerSuccess.authToken.expiry)
+                window.location.replace(window.location.origin + "/main")
+            } else if (message.registerFail) {
+                alert("Registering Failed Reason: " + message.registerFail);
+                console.log("Registering Failed Reason: " + message.registerFail);
+            } else if (message.tokenSuccess) {
+                console.log("Token Worked", message.tokenSuccess.username)
+                window.location.replace(window.location.origin + "/main")
+            }
+
+        });
+
+
+    })
+    function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+function sendLogin(){
+    var username = document.getElementById("login_username").value;
+    var password = document.getElementById("login_password").value;
+    if(username.length < 5) {alert("Invalid Username"); return;}
+    if(password.length < 5) {alert("Invalid Password"); return;}
+    var passhash = CryptoJS.MD5(password).toString();
+    publicRoom.send({login:{username:username,password:passhash}})
+}
+
+function sendRegister(){
+    var name =document.getElementById("register_name").value;
+    var username = document.getElementById("register_username").value;
+    var password = document.getElementById("register_password").value;
+    var cpassword = document.getElementById("register_confirmpassword").value;
+    if(name.length < 3) {alert("Invalid Name"); return;}
+    if(username.length < 5) {alert("Invalid Username"); return;}
+    if(password.length < 5) {alert("Invalid Password"); return;}
+    if(password != cpassword) {alert("Password do not match"); return;}
+    var passhash = CryptoJS.MD5(password).toString();
+    publicRoom.send({register:{name:name,username:username,password:passhash}})
+}
+
+</script>

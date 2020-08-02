@@ -1,0 +1,239 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+<style>
+    html{
+        font-family:Arial,sans-serif
+    }
+
+    .w-button {
+    display: inline-block;
+    padding: 9px 15px;
+    background-color: #3898EC;
+    color: white;
+    border: 0;
+    line-height: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 0
+}
+    h4 {
+        margin-top: 10px;
+        margin-right: 20px;
+        margin-bottom: 10px;
+        padding-left: 7px;
+        font-size: 18px;
+        line-height: 24px;
+        font-weight: 700;
+    }
+
+    .section {
+        height: 100vh;
+        min-height: 1000px;
+    }
+
+    .heading {
+        text-align: center;
+    }
+
+    .div-block {
+        display: flex;
+    }
+
+    .heading-2 {
+        text-align: center;
+    }
+
+    .column {
+        display: flex;
+        height: 80px;
+
+        justify-content: center;
+        align-items: center;
+    }
+
+    .column-2 {
+        display: flex;
+        height: 80px;
+
+        justify-content: center;
+    }
+
+    .div-block-2 {
+        display: flex;
+
+        justify-content: center;
+
+        align-items: center;
+    }
+
+    .div-block-3 {
+        display: flex;
+        height: 50vh;
+
+        flex-direction: column;
+
+        justify-content: space-around;
+
+        align-items: center;
+    }
+
+    .button {
+        width: auto;
+    }
+
+    .scoreboardplayer {
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+    }
+
+    .div-block-4 {
+        display: flex;
+        width: 400px;
+
+        flex-direction: column;
+
+        align-items: center;
+    }
+
+    .columns {
+        margin-bottom: 25px;
+    }
+
+    .colorIndicator{
+        margin-left:auto;
+        margin-right:auto;
+        width:50px;
+        height: 50px; 
+    }
+</style>
+<div class="section">
+    <div class="columns">
+        
+        <div>
+            <h2 id="usernameText" class="heading-2">Username</h2>
+        </div>
+        <div id="colorIndicator" class ="colorIndicator"></div>
+        <div class="column">
+            <div id="chipCount">Chips:</div>
+        </div>
+    </div>
+    <div class="div-block-3"><a href="#" onclick="window.location.href = (window.location.origin+'/poker')" class="button w-button">Join Game</a>
+        <div class="div-block-4">
+            <h2>Scoreboard</h2>
+            <div>
+                <div>
+                    <ol start="0">
+                        <li style="list-style: none;">
+                            <div class="scoreboardplayer">
+                                <h4 >Username</h4>
+                                <div >Chips</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="scoreboardplayer">
+                                <h4 id="sb1-name">Username</h4>
+                                <div id="sb1-chips">Chips</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="scoreboardplayer">
+                                <h4 id="sb2-name">Username</h4>
+                                <div id="sb2-chips">Chips</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="scoreboardplayer">
+                                <h4 id="sb3-name">Username</h4>
+                                <div id="sb3-chips">Chips</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="scoreboardplayer">
+                                <h4 id="sb4-name">Username</h4>
+                                <div id="sb4-chips">Chips</div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="scoreboardplayer">
+                                <h4 id="sb5-name">Username</h4>
+                                <div id="sb5-chips">Chips</div>
+                            </div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<body>
+
+</body>
+
+</html>
+<script type="text/javascript" src="./public/colyseus.js"></script>
+<script>
+
+    var host = window.document.location.host.replace(/:.*/, '');
+    var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':' + location.port : ''));
+    var publicRoom;
+    try{
+    client.joinOrCreate("MainMenu",{accessToken: getCookie("authTokenID")}).then(room => {
+        console.log("Access Granted")
+        publicRoom = room;
+        room.onMessage((message) => {
+            if(message.userdata){
+                var userdata = message.userdata
+                document.getElementById("usernameText").innerText = userdata.username
+                document.getElementById("chipCount").innerText = "Chips: " + userdata.chips
+                document.getElementById("colorIndicator").style = "background-color:" + userdata.color
+               
+            }else if (message.scoreboardUpdate){
+                for(let i =1;i<=message.scoreboardUpdate.length;i++){
+                    var eluser = document.getElementById("sb"+ i + "-name")
+                    var elchips = document.getElementById("sb"+ i + "-chips")
+                    eluser.innerText = message.scoreboardUpdate[i-1].Username
+                    elchips.innerText = message.scoreboardUpdate[i-1].Chips
+                }
+            }
+        });
+
+
+    }).catch(e =>{
+            console.log("Access Denied")
+            window.location.replace(window.location.origin) 
+        })
+}
+catch(error){
+    if(publicRoom == undefined){
+        console.log("Access Denied")
+        window.location.replace(window.location.origin)
+    }else{
+        console.log(error);
+    }
+  
+}
+
+
+    function getCookie(cname) {
+  var name = cname + "=";
+  var decodedCookie = decodeURIComponent(document.cookie);
+  var ca = decodedCookie.split(';');
+  for(var i = 0; i <ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+</script>

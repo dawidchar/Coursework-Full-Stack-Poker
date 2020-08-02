@@ -1,0 +1,24 @@
+Hello World!
+
+ <!-- colyseus.js client -->
+ <!-- https://raw.githack.com/colyseus/colyseus.js/master/dist/colyseus.js -->
+ <script type="text/javascript" src="./public/colyseus.js"></script>
+
+ <script>
+    var host = window.document.location.host.replace(/:.*/, '');
+
+    var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':'+location.port : ''));
+    client.joinOrCreate("PokerRoom").then(room => {
+      console.log("joined");
+      room.onStateChange.once(function(state) {
+          console.log("initial room state:", state);
+      }
+      );
+
+
+      room.onMessage((message) => {
+  console.log("message received from server");
+  console.log(message);
+});
+    });
+    </script>
