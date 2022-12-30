@@ -20,7 +20,7 @@
     "@colyseus/social": "^0.10.2",
     "@types/socket.io": "^2.1.4",
     "bufferutil": "^4.0.1",
-    "colyseus": "^0.11.0",
+    "colyseus": "^0.14.24",
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-jwt": "^5.3.1",
